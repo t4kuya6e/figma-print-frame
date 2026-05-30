@@ -51,9 +51,15 @@ figma-print-frame/
     └── code.js        # ビルド成果物（manifest の main が参照）
 ```
 
+## リポジトリ
+
+https://github.com/t4kuya6e/figma-print-frame
+
 ## セットアップ
 
 ```bash
+git clone git@github.com:t4kuya6e/figma-print-frame.git
+cd figma-print-frame
 npm install
 ```
 
