@@ -1,0 +1,262 @@
+<html>
+<head>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: Inter, "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 12px;
+    color: #333;
+    padding: 16px;
+    background: #fff;
+  }
+  .field { margin-bottom: 14px; }
+  label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 4px;
+    font-size: 11px;
+    color: #555;
+  }
+  select, input[type="number"] {
+    width: 100%;
+    height: 32px;
+    padding: 0 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 12px;
+    background: #fff;
+  }
+  select:focus, input:focus {
+    outline: none;
+    border-color: #18a0fb;
+  }
+  .radio-group {
+    display: flex;
+    gap: 16px;
+    margin-top: 4px;
+  }
+  .radio-group label {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-weight: 400;
+    font-size: 12px;
+    color: #333;
+    cursor: pointer;
+  }
+  .bleed-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-top: 4px;
+  }
+  .bleed-row button {
+    height: 32px;
+    padding: 0 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background: #f5f5f5;
+    font-size: 12px;
+    cursor: pointer;
+  }
+  .bleed-row button.active {
+    background: #18a0fb;
+    color: #fff;
+    border-color: #18a0fb;
+  }
+  .bleed-row input[type="number"] {
+    width: 80px;
+    flex-shrink: 0;
+  }
+  .size-preview {
+    margin-top: 6px;
+    padding: 6px 8px;
+    background: #f5f5f5;
+    border-radius: 4px;
+    font-size: 12px;
+    color: #555;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+  }
+  .safeline-note {
+    font-size: 10px;
+    color: #888;
+    margin-top: 2px;
+  }
+  .generate-btn {
+    width: 100%;
+    height: 36px;
+    background: #18a0fb;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 8px;
+  }
+  .generate-btn:hover { background: #0d8de5; }
+  .generate-btn:active { background: #0b7dd0; }
+</style>
+</head>
+<body>
+
+<div class="field">
+  <label>用紙サイズ</label>
+  <select id="paperSize">
+    <option value="A3">A3 (297×420mm)</option>
+    <option value="A4" selected>A4 (210×297mm)</option>
+    <option value="A5">A5 (148×210mm)</option>
+    <option value="A6">A6 (105×148mm)</option>
+    <option value="名刺JP">名刺 日本 (55×91mm)</option>
+    <option value="名刺US">名刺 欧米 (51×89mm)</option>
+    <option value="custom">任意サイズ</option>
+  </select>
+</div>
+
+<div class="field" id="customSizeField" style="display: none;">
+  <label>任意サイズ (mm)</label>
+  <div class="bleed-row">
+    <input type="number" id="customW" placeholder="幅" min="1" max="1000" step="0.5">
+    <span style="color: #888;">×</span>
+    <input type="number" id="customH" placeholder="高さ" min="1" max="1000" step="0.5">
+  </div>
+</div>
+
+<div class="field">
+  <label>向き</label>
+  <div class="radio-group">
+    <label><input type="radio" name="orientation" value="portrait" checked> 縦</label>
+    <label><input type="radio" name="orientation" value="landscape"> 横</label>
+  </div>
+</div>
+
+<div class="field">
+  <label>解像度</label>
+  <select id="dpi">
+    <option value="350" selected>350dpi</option>
+    <option value="300">300dpi</option>
+    <option value="250">250dpi</option>
+    <option value="200">200dpi</option>
+    <option value="150">150dpi</option>
+  </select>
+</div>
+
+<div class="field">
+  <label>仕上がりサイズ</label>
+  <div class="size-preview" id="sizePreview">2894px × 4093px</div>
+</div>
+
+<div class="field">
+  <label>塗り足し (mm)</label>
+  <div class="bleed-row">
+    <button type="button" class="bleed-preset active" data-value="3">3mm</button>
+    <button type="button" class="bleed-preset" data-value="5">5mm</button>
+    <input type="number" id="bleedMm" value="3" min="0" max="30" step="0.5">
+  </div>
+</div>
+
+<div class="field">
+  <label>セーフライン (mm)</label>
+  <input type="number" id="safelineMm" value="3" min="0" max="30" step="0.5">
+  <div class="safeline-note">※ デフォルトは塗り足しと同じ値</div>
+</div>
+
+<button class="generate-btn" id="generateBtn">生成</button>
+
+<script>
+  const bleedInput = document.getElementById('bleedMm');
+  const safelineInput = document.getElementById('safelineMm');
+  const paperSizeSelect = document.getElementById('paperSize');
+  const sizePreview = document.getElementById('sizePreview');
+  const presetBtns = document.querySelectorAll('.bleed-preset');
+  const customSizeField = document.getElementById('customSizeField');
+  const customWInput = document.getElementById('customW');
+  const customHInput = document.getElementById('customH');
+  const dpiSelect = document.getElementById('dpi');
+  let safelineSynced = true;
+
+  const PAPERS = { A3: [297, 420], A4: [210, 297], A5: [148, 210], A6: [105, 148], '名刺JP': [55, 91], '名刺US': [51, 89] };
+
+  function mmToPx(mm, dpi) { return Math.round(mm * dpi / 25.4); }
+
+  function getDimsMm() {
+    if (paperSizeSelect.value === 'custom') {
+      return [parseFloat(customWInput.value) || 0, parseFloat(customHInput.value) || 0];
+    }
+    return PAPERS[paperSizeSelect.value];
+  }
+
+  function updateSizePreview() {
+    const dims = getDimsMm();
+    const dpi = parseInt(dpiSelect.value);
+    const orientation = document.querySelector('input[name="orientation"]:checked').value;
+    const w = orientation === 'landscape' ? dims[1] : dims[0];
+    const h = orientation === 'landscape' ? dims[0] : dims[1];
+    if (!w || !h) {
+      sizePreview.textContent = '幅・高さを入力してください';
+      return;
+    }
+    sizePreview.textContent = `${mmToPx(w, dpi)}px × ${mmToPx(h, dpi)}px`;
+  }
+
+  function updateCustomVisibility() {
+    customSizeField.style.display = paperSizeSelect.value === 'custom' ? 'block' : 'none';
+  }
+
+  paperSizeSelect.addEventListener('change', () => { updateCustomVisibility(); updateSizePreview(); });
+  customWInput.addEventListener('input', updateSizePreview);
+  customHInput.addEventListener('input', updateSizePreview);
+  document.querySelectorAll('input[name="orientation"]').forEach(r => r.addEventListener('change', updateSizePreview));
+  dpiSelect.addEventListener('change', updateSizePreview);
+  updateCustomVisibility();
+  updateSizePreview();
+
+  presetBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      presetBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      bleedInput.value = btn.dataset.value;
+      if (safelineSynced) safelineInput.value = btn.dataset.value;
+    });
+  });
+
+  bleedInput.addEventListener('input', () => {
+    presetBtns.forEach(b => b.classList.remove('active'));
+    if (safelineSynced) safelineInput.value = bleedInput.value;
+  });
+
+  safelineInput.addEventListener('input', () => {
+    safelineSynced = false;
+  });
+
+  bleedInput.addEventListener('change', () => {
+    if (bleedInput.value === safelineInput.value) safelineSynced = true;
+  });
+
+  document.getElementById('generateBtn').addEventListener('click', () => {
+    const paperSize = paperSizeSelect.value;
+    const orientation = document.querySelector('input[name="orientation"]:checked').value;
+    const dpi = parseInt(dpiSelect.value);
+    const bleedMm = parseFloat(bleedInput.value) || 0;
+    const safelineMm = parseFloat(safelineInput.value) || 0;
+    const customW = parseFloat(customWInput.value) || 0;
+    const customH = parseFloat(customHInput.value) || 0;
+
+    parent.postMessage({
+      pluginMessage: {
+        type: 'generate',
+        paperSize,
+        orientation,
+        dpi,
+        bleedMm,
+        safelineMm,
+        customW,
+        customH
+      }
+    }, '*');
+  });
+</script>
+
+</body>
+</html>
