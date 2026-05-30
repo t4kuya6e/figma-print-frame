@@ -1,7 +1,7 @@
 {
   "name": "figma-print-frame",
   "version": "1.4.0",
-  "description": "印刷用アートボード生成プラグイン",
+  "description": "Figma plugin that generates print-ready artboard frames",
   "scripts": {
     "build": "esbuild src/code.ts --bundle --outfile=dist/code.js --target=es2017",
     "watch": "esbuild src/code.ts --bundle --outfile=dist/code.js --target=es2017 --watch"
