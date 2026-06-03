@@ -67,9 +67,9 @@
     frame.fills = [{ type: "SOLID", color: { r: 1, g: 1, b: 1 } }];
     const frameW = wPx + bleedPx * 2;
     const frameH = hPx + bleedPx * 2;
-    const cutRects = createGuideRects(frameW, frameH, bleedPx, { r: 0.9, g: 0.1, b: 0.5 }, 0.3, "CutLine");
+    const trimRects = createGuideRects(frameW, frameH, bleedPx, { r: 0.9, g: 0.1, b: 0.5 }, 0.3, "TrimLine");
     const safeRects = createGuideRects(frameW, frameH, bleedPx + safelinePx, { r: 0, g: 0.8, b: 0.9 }, 0.3, "SafeLine");
-    const guideGroup = figma.group([...cutRects, ...safeRects], frame);
+    const guideGroup = figma.group([...trimRects, ...safeRects], frame);
     guideGroup.name = "guide";
     guideGroup.locked = true;
     figma.currentPage.appendChild(frame);

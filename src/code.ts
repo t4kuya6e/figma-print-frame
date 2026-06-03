@@ -102,14 +102,14 @@ figma.ui.onmessage = (msg: {
   const frameW = wPx + bleedPx * 2;
   const frameH = hPx + bleedPx * 2;
 
-  // Cut line (magenta 30% line, at the bleed position)
-  const cutRects = createGuideRects(frameW, frameH, bleedPx, { r: 0.9, g: 0.1, b: 0.5 }, 0.3, "CutLine");
+  // Trim line (magenta 30% line, at the finished-size edge / bleed offset)
+  const trimRects = createGuideRects(frameW, frameH, bleedPx, { r: 0.9, g: 0.1, b: 0.5 }, 0.3, "TrimLine");
 
   // Safe line (cyan 30% line, at the bleed + safe line position)
   const safeRects = createGuideRects(frameW, frameH, bleedPx + safelinePx, { r: 0, g: 0.8, b: 0.9 }, 0.3, "SafeLine");
 
   // Group the guides together and lock them
-  const guideGroup = figma.group([...cutRects, ...safeRects], frame);
+  const guideGroup = figma.group([...trimRects, ...safeRects], frame);
   guideGroup.name = "guide";
   guideGroup.locked = true;
 
