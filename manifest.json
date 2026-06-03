@@ -1,8 +1,10 @@
 {
-  "name": "Print Frame Generator",
-  "id": "print-frame-generator",
+  "name": "Print Frame with Bleed",
+  "id": "1643924424838424668",
   "api": "1.0.0",
   "main": "dist/code.js",
   "ui": "src/ui.html",
-  "editorType": ["figma"]
+  "editorType": ["figma"],
+  "documentAccess": "dynamic-page",
+  "networkAccess": { "allowedDomains": ["none"] }
 }

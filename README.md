@@ -1,4 +1,4 @@
-# Print Frame Generator
+# Print Frame with Bleed
 
 印刷用アートボード（フレーム）を生成する Figma プラグインです。用紙サイズ・向き・解像度・塗り足しを指定すると、トンボ相当のカットライン／セーフラインのガイド付きフレームを自動生成します。
 
@@ -81,7 +81,7 @@ npm run watch
 2. Figma デスクトップアプリを開く
 3. メニューから **Plugins → Development → Import plugin from manifest...** を選択
 4. このフォルダの `manifest.json` を指定する
-5. **Plugins → Development → Print Frame Generator** で起動
+5. **Plugins → Development → Print Frame with Bleed** で起動
 
 ## 使い方
 
